@@ -7,8 +7,13 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -21,19 +26,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
 
-      - name: Install Dependencies
+      - name: Get Dependencies
         run: flutter pub get
 
-      - name: Regenerate Web Project
-        run: flutter create . --platforms web --overwrite
-
       - name: Build Web
-        run: |
-          sleep 2
-          flutter build web --release --base-href "/Vivek-Sai/" --web-renderer canvaskit --no-tree-shake-icons
-
+        run: flutter build web --release --base-href "/Vivek-Sai/"
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
