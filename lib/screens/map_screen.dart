@@ -11,7 +11,25 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   int currentFloor = 1;
   bool isNavigating = false;
   bool showPath = false;
+  bool _hasCheckedArgs = false;
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasCheckedArgs) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args != null && args is String) {
+        if (args.toLowerCase().contains('computer')) {
+          setState(() {
+            currentFloor = 3;
+            showPath = true;
+          });
+        }
+      }
+      _hasCheckedArgs = true;
+    }
+  }
 
   void _startNavigation() {
     setState(() {

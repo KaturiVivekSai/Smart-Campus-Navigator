@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
             
             // Hero Card
             GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/map'),
+              onTap: () => Navigator.pushNamed(context, '/map', arguments: 'Computer Lab'),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -164,7 +164,7 @@ class HomeScreen extends StatelessWidget {
               'Computer Lab 3',
               'Floor 3, Block A',
               Icons.computer_rounded,
-              () => Navigator.pushNamed(context, '/map'),
+              () => Navigator.pushNamed(context, '/map', arguments: 'Computer Lab 3'),
             ),
             _buildActionCard(
               context,

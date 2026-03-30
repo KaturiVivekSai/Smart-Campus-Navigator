@@ -1,5 +1,7 @@
 # Smart Campus Navigator 🚀
 
+### 🔗 [Live Demo - Your Link Here](https://your-username.github.io/your-repository-name/)
+
 A premium, interactive Flutter application designed for seamless campus navigation and management. This project features role-based authentication, a 3-floor interactive map, and a glassmorphism UI.
 
 ## ✨ Key Features
