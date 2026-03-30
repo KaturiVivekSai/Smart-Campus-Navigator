@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -17,14 +20,14 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          flutter-version: '3.19.0' # Specifying a version for stability
           cache: true
 
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build Web
-        # Replace Vivek-Sai with your actual repo name if it changes
-        run: flutter build web --release --base-href "/Vivek-Sai/"
+        run: flutter build web --release --base-href "/Vivek-Sai/" --web-renderer html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
