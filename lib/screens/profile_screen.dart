@@ -124,6 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _tf('Department', d, Icons.business_rounded), const SizedBox(height: 28),
         SizedBox(width: double.infinity, height: 52, child: ElevatedButton(onPressed: () {
           userSession.updateProfile(n.text, e.text, d.text);
+          setState((){});
           Navigator.pop(c); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated!'), backgroundColor: Color(0xFF27AE60)));
         }, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2F80ED), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
           child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),

@@ -8,22 +8,24 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
-  int currentFloor = 0; // 0 = Ground
+  int currentFloor = 0; 
   bool isNavigating = false;
   bool showPath = false;
   bool _hasCheckedArgs = false;
   String _destination = '';
   final TextEditingController _searchController = TextEditingController();
   
-  double _userX = 0.5, _userY = 0.85; // Starting position
-  double _userRotation = 0.0; // Angle facing
+  double _userX = 0.5, _userY = 0.85; 
+  int _userFloor = 0;
+  double _userRotation = 0.0; 
   
   late AnimationController _pulseController;
+  late AnimationController _walkController;
   late Animation<double> _pulseAnim;
 
   final Map<String, Map<String, dynamic>> _locations = {
     'Principal Room': {'floor': 0, 'x': 0.35, 'y': 0.22, 'icon': Icons.person, 'block': 'Admin Block'},
-    'Admin Office': {'floor': 1, 'x': 0.35, 'y': 0.35, 'icon': Icons.business, 'block': 'Admin Block'},
+    'Admin Office': {'floor': 0, 'x': 0.35, 'y': 0.35, 'icon': Icons.business, 'block': 'Admin Block'},
     'Staff Room': {'floor': 2, 'x': 0.35, 'y': 0.45, 'icon': Icons.groups, 'block': 'Admin Block'},
     'Computer Lab 1': {'floor': 1, 'x': 0.72, 'y': 0.35, 'icon': Icons.computer, 'block': 'Block A'},
     'Computer Lab 2': {'floor': 2, 'x': 0.72, 'y': 0.35, 'icon': Icons.computer, 'block': 'Block A'},
@@ -34,7 +36,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     'Drawing Lab': {'floor': 2, 'x': 0.25, 'y': 0.7, 'icon': Icons.draw, 'block': 'Block C'},
     'Auditorium': {'floor': 1, 'x': 0.5, 'y': 0.7, 'icon': Icons.theater_comedy, 'block': 'Block C'},
     'Cafeteria': {'floor': 0, 'x': 0.25, 'y': 0.7, 'icon': Icons.restaurant, 'block': 'Ground'},
-    'Exam Hall': {'floor': 2, 'x': 0.72, 'y': 0.55, 'icon': Icons.edit_document, 'block': 'Block B'},
+    'Exam Cell': {'floor': 2, 'x': 0.72, 'y': 0.55, 'icon': Icons.edit_document, 'block': 'Block B'},
     'Sports Room': {'floor': 1, 'x': 0.75, 'y': 0.7, 'icon': Icons.sports_basketball, 'block': 'Block C'},
     'Seminar Hall': {'floor': 3, 'x': 0.5, 'y': 0.45, 'icon': Icons.co_present, 'block': 'Block B'},
   };
@@ -44,6 +46,9 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     super.initState();
     _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat(reverse: true);
     _pulseAnim = Tween<double>(begin: 1.0, end: 1.6).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+    
+    _walkController = AnimationController(vsync: this, duration: const Duration(seconds: 1));
+    _walkController.addListener(_simulateWalking);
   }
 
   @override
@@ -65,90 +70,109 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     }
   }
 
+  void _onMapTap(TapUpDetails details, BoxConstraints constraints) {
+    if (isNavigating) return;
+    final w = constraints.maxWidth, h = constraints.maxHeight;
+    final tapX = details.localPosition.dx / w;
+    final tapY = details.localPosition.dy / h;
+    String nearest = '';
+    double minDist = double.infinity;
+    for (var e in _locations.entries) {
+      if (e.value['floor'] != currentFloor) continue;
+      final dx = tapX - (e.value['x'] as double);
+      final dy = tapY - (e.value['y'] as double);
+      final d = dx * dx + dy * dy;
+      if (d < 0.05 && d < minDist) { minDist = d; nearest = e.key; }
+    }
+    if (nearest.isNotEmpty) {
+      setState(() { _destination = nearest; showPath = true; _searchController.text = nearest; });
+    }
+  }
+
   void _startNavigation() {
     setState(() { 
       isNavigating = true; 
-      _userX = 0.5; _userY = 0.85; _userRotation = 0.0;
-      currentFloor = 0; // Start at Ground floor
+      currentFloor = _userFloor;
+      _walkController.repeat();
     });
   }
 
-  // Simulates real-world movement step by step to mimic GPS
-  void _stepForward() {
+  void _simulateWalking() {
+    if (!isNavigating) return;
+    
     final loc = _locations[_destination];
-    if (loc == null) return;
+    if (loc == null) { _stopNavigation(); return; }
     
-    // Check if we need to change floors first
     final destFloor = loc['floor'] as int;
-    if (currentFloor != destFloor && _userY <= 0.45) {
-      // Reached stairs point (approx 0.5, 0.43)
-      setState(() => currentFloor = destFloor);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Switched to Floor $destFloor 🪜'), duration: const Duration(seconds: 1)));
-      return;
-    }
-    
-    // Waypoints calculation
-    List<Offset> waypoints = [const Offset(0.5, 0.85), const Offset(0.5, 0.43)];
-    final destX = loc['x'] as double;
-    final destY = loc['y'] as double;
-    if (destX != 0.5) waypoints.add(Offset(destX, 0.43));
-    waypoints.add(Offset(destX, destY));
 
-    // Find current segment
-    for (int i = 0; i < waypoints.length - 1; i++) {
-      Offset p1 = waypoints[i];
-      Offset p2 = waypoints[i+1];
-      
-      // Check if user is on this segment
-      if (_userX == p1.dx && _userY == p1.dy) {
-        // Move towards p2
-        _moveUserTowardsPoint(p2);
+    // Wait 1 second before switching floor to give user time to read snackbar
+    if (_userFloor != destFloor) {
+      if ((_userX - 0.5).abs() < 0.01 && (_userY - 0.43).abs() < 0.01) {
+        setState(() {
+          _userFloor = destFloor;
+          currentFloor = destFloor; 
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Switched to Floor $destFloor 🪜'), duration: const Duration(seconds: 1)));
         return;
+      } else {
+        // First move to corridor if not on it, then to stairs
+        if ((_userY - 0.43).abs() > 0.01) {
+          _moveUserTowardsPoint(Offset(_userX, 0.43));
+        } else {
+          _moveUserTowardsPoint(const Offset(0.5, 0.43));
+        }
       }
+    } else {
+      final destX = loc['x'] as double;
+      final destY = loc['y'] as double;
       
-      // If moving along segment
-      final dist1 = sqrt(pow(_userX - p1.dx, 2) + pow(_userY - p1.dy, 2));
-      final dist2 = sqrt(pow(_userX - p2.dx, 2) + pow(_userY - p2.dy, 2));
-      final segLen = sqrt(pow(p2.dx - p1.dx, 2) + pow(p2.dy - p1.dy, 2));
-      
-      if ((dist1 + dist2) - segLen < 0.01) {
-        _moveUserTowardsPoint(p2);
-        return;
+      if ((_userY - 0.43).abs() > 0.01 && (_userX - destX).abs() > 0.01) {
+         _moveUserTowardsPoint(Offset(_userX, 0.43));
+      } else if ((_userX - destX).abs() > 0.01) {
+         _moveUserTowardsPoint(Offset(destX, 0.43));
+      } else if ((_userY - destY).abs() > 0.01) {
+         _moveUserTowardsPoint(Offset(destX, destY));
+      } else {
+         _stopNavigation();
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You have arrived at your destination! 🎉'), backgroundColor: Color(0xFF27AE60)));
       }
     }
   }
 
   void _moveUserTowardsPoint(Offset target) {
-    const stepSize = 0.08;
+    const stepSize = 0.006; 
     double dx = target.dx - _userX;
     double dy = target.dy - _userY;
     double dist = sqrt(dx*dx + dy*dy);
     
     if (dist <= stepSize) {
       setState(() { _userX = target.dx; _userY = target.dy; });
-      // If reached final destination
-      if (_userX == _locations[_destination]!['x'] && _userY == _locations[_destination]!['y']) {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You have arrived at your destination! 🎉'), backgroundColor: Color(0xFF27AE60)));
-      }
     } else {
       setState(() {
         _userX += (dx / dist) * stepSize;
         _userY += (dy / dist) * stepSize;
-        _userRotation = atan2(dy, dx) + pi/2; // Orient triangle
+        _userRotation = atan2(dy, dx) + pi/2; 
       });
     }
   }
 
   void _stopNavigation() {
-    setState(() { isNavigating = false; _userX = 0.5; _userY = 0.85; _userRotation = 0; });
+    setState(() { isNavigating = false; });
+    _walkController.stop();
   }
 
   void _clearDestination() {
-    setState(() { isNavigating = false; showPath = false; _destination = ''; _userX = 0.5; _userY = 0.85; _searchController.clear(); });
+    setState(() { isNavigating = false; showPath = false; _destination = ''; _searchController.clear(); });
+    _walkController.stop();
   }
 
   @override
-  void dispose() { _pulseController.dispose(); _searchController.dispose(); super.dispose(); }
+  void dispose() { 
+    _pulseController.dispose(); 
+    _walkController.dispose();
+    _searchController.dispose(); 
+    super.dispose(); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,20 +180,25 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       backgroundColor: const Color(0xFFF0F4FF),
       body: Stack(children: [
         Positioned.fill(
-          child: AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) => CustomPaint(
-              painter: BuildingMapPainter(floor: currentFloor, showPath: showPath, isNavigating: isNavigating,
-                userX: _userX, userY: _userY, userRotation: _userRotation, destination: _destination, locations: _locations, pulseScale: _pulseAnim.value),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                onTapUp: (d) => _onMapTap(d, constraints),
+                child: AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, child) => CustomPaint(
+                    painter: BuildingMapPainter(floor: currentFloor, showPath: showPath, isNavigating: isNavigating,
+                      userX: _userX, userY: _userY, userFloor: _userFloor, userRotation: _userRotation, destination: _destination, locations: _locations, pulseScale: _pulseAnim.value),
+                  ),
+                ),
+              );
+            }
           ),
         ),
         _buildHeader(context),
         _buildFloorSwitcher(),
         if (showPath && !isNavigating) _buildDestinationCard(),
         if (isNavigating) Positioned(right: 16, bottom: 90, child: Column(children: [
-          _hoverBtn(Icons.directions_walk_rounded, const Color(0xFF2F80ED), _stepForward),
-          const SizedBox(height: 12),
           _hoverBtn(Icons.volume_up_rounded, const Color(0xFF27AE60), _showVoice),
           const SizedBox(height: 12),
           _hoverBtn(Icons.stop_rounded, Colors.redAccent, _stopNavigation),
@@ -184,11 +213,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     final loc = _locations[_destination];
     String destFloor = loc!['floor'].toString();
     if (destFloor == '0') destFloor = 'Ground';
-    String currFloor = currentFloor.toString();
-    if (currentFloor == 0) currFloor = 'Ground';
+    String currFloor = _userFloor.toString();
+    if (_userFloor == 0) currFloor = 'Ground';
     
     String g = 'Head towards ${loc['block']}. $_destination is on Floor $destFloor. You are on Floor $currFloor.';
-    if (loc['floor'] != currentFloor) g += ' Follow the path to the stairs.';
+    if (loc['floor'] != _userFloor) g += ' Follow the path to the stairs.';
     
     showDialog(context: context, builder: (c) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -212,7 +241,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               const Icon(Icons.navigation_rounded, color: Colors.white), const SizedBox(width: 12),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                 Text('Navigating to $_destination', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                Text('Floor ${currentFloor == 0 ? "Ground" : currentFloor} • Press Walk Icon to advance', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text('Floor ${currentFloor == 0 ? "Ground" : currentFloor}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
               ])),
             ]))
         : Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [const BoxShadow(color: Colors.black12, blurRadius: 10)]),
@@ -267,9 +296,13 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
 class BuildingMapPainter extends CustomPainter {
   final int floor; final bool showPath, isNavigating;
-  final double userX, userY, userRotation; final String destination;
+  final double userX, userY, userRotation; 
+  final int userFloor;
+  final String destination;
   final Map<String, Map<String, dynamic>> locations; final double pulseScale;
-  BuildingMapPainter({required this.floor, required this.showPath, required this.isNavigating, required this.userX, required this.userY, required this.userRotation, required this.destination, required this.locations, required this.pulseScale});
+  
+  BuildingMapPainter({required this.floor, required this.showPath, required this.isNavigating, required this.userX, 
+      required this.userY, required this.userFloor, required this.userRotation, required this.destination, required this.locations, required this.pulseScale});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -277,22 +310,18 @@ class BuildingMapPainter extends CustomPainter {
     canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFF0F4FF));
     canvas.drawRRect(RRect.fromLTRBR(w * 0.05, h * 0.12, w * 0.95, h * 0.92, const Radius.circular(20)), Paint()..color = const Color(0xFFE8F0FE));
     
-    // Buildings
     _bld(canvas, 'Admin Block', w * 0.08, h * 0.15, w * 0.38, h * 0.28, const Color(0xFFBBDEFB));
     _bld(canvas, 'Block A', w * 0.54, h * 0.15, w * 0.38, h * 0.28, const Color(0xFFC8E6C9));
     _bld(canvas, 'Block B', w * 0.2, h * 0.48, w * 0.6, h * 0.15, const Color(0xFFFFE0B2));
     _bld(canvas, 'Block C', w * 0.08, h * 0.68, w * 0.38, h * 0.18, const Color(0xFFF8BBD0));
     _bld(canvas, 'Ground', w * 0.54, h * 0.68, w * 0.38, h * 0.18, const Color(0xFFE1BEE7));
     
-    // Corridors
     final cp = Paint()..color = const Color(0xFFE0E0E0)..strokeWidth = 3..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(w * 0.5, h * 0.28), Offset(w * 0.5, h * 0.85), cp); // Vertical main
-    canvas.drawLine(Offset(w * 0.08, h * 0.43), Offset(w * 0.92, h * 0.43), cp); // Horizontal cross
+    canvas.drawLine(Offset(w * 0.5, h * 0.28), Offset(w * 0.5, h * 0.85), cp); 
+    canvas.drawLine(Offset(w * 0.08, h * 0.43), Offset(w * 0.92, h * 0.43), cp); 
     
-    // Draw Stairs icon at intersection
     _drawStairs(canvas, w * 0.5, h * 0.43);
 
-    // Locations
     for (var e in locations.entries) {
       if (e.value['floor'] != floor) continue;
       final rx = w * (e.value['x'] as double), ry = h * (e.value['y'] as double);
@@ -308,31 +337,28 @@ class BuildingMapPainter extends CustomPainter {
       tp.paint(canvas, Offset(rx - tp.width / 2, ry + 10));
     }
 
-    // Path
     if (showPath && destination.isNotEmpty) {
       final loc = locations[destination];
       if (loc != null) {
         final dx = loc['x'] as double, dy = loc['y'] as double, dFloor = loc['floor'] as int;
         
-        // Show path if user is on the floor where path starts (0) or path ends (dFloor)
-        if (floor == 0 || floor == dFloor) {
+        if (floor == userFloor || floor == dFloor) {
           final path = Path();
-          // Ground floor path segment to stairs
-          if (floor == 0 && dFloor != 0) {
-            path.moveTo(w * 0.5, h * 0.85);
+          
+          if (floor == userFloor && floor != dFloor) {
+            path.moveTo(w * userX, h * userY);
+            if ((userY - 0.43).abs() > 0.01) path.lineTo(w * userX, h * 0.43);
             path.lineTo(w * 0.5, h * 0.43);
           } 
-          // Final floor path segment from stairs to room
-          else if (floor == dFloor && dFloor != 0) {
-            path.moveTo(w * 0.5, h * 0.43); // stairs
-            path.lineTo(w * dx, h * 0.43);
+          else if (floor == dFloor && floor != userFloor) {
+            path.moveTo(w * 0.5, h * 0.43);
+            if ((dy - 0.43).abs() > 0.01) path.lineTo(w * dx, h * 0.43);
             path.lineTo(w * dx, h * dy);
           }
-          // Same floor direct path
-          else if (floor == 0 && dFloor == 0) {
-            path.moveTo(w * 0.5, h * 0.85);
-            path.lineTo(w * 0.5, h * 0.43);
-            path.lineTo(w * dx, h * 0.43);
+          else if (floor == userFloor && floor == dFloor) {
+            path.moveTo(w * userX, h * userY);
+            if ((userY - 0.43).abs() > 0.01) path.lineTo(w * userX, h * 0.43);
+            if ((dx - userX).abs() > 0.01) path.lineTo(w * dx, h * 0.43);
             path.lineTo(w * dx, h * dy);
           }
 
@@ -348,18 +374,12 @@ class BuildingMapPainter extends CustomPainter {
       }
     }
     
-    // Draw User Location as a Triangle
-    if (!isNavigating || true) {
+    if (floor == userFloor) {
       canvas.drawCircle(Offset(w * userX, h * userY), 16 * pulseScale, Paint()..color = const Color(0xFF2F80ED).withOpacity(0.2));
       canvas.save();
       canvas.translate(w * userX, h * userY);
       canvas.rotate(userRotation);
-      final pointerPath = Path()
-        ..moveTo(0, -9)
-        ..lineTo(7, 7)
-        ..lineTo(0, 3)
-        ..lineTo(-7, 7)
-        ..close();
+      final pointerPath = Path()..moveTo(0, -9)..lineTo(7, 7)..lineTo(0, 3)..lineTo(-7, 7)..close();
       canvas.drawPath(pointerPath, Paint()..color = Colors.white);
       canvas.drawPath(pointerPath, Paint()..color = const Color(0xFF2F80ED)..style = PaintingStyle.stroke..strokeWidth = 2);
       canvas.restore();

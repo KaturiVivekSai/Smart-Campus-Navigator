@@ -24,7 +24,7 @@ class _SearchScreenState extends State<SearchScreen> {
     {'name': 'Library', 'location': 'Block B, Floor 1', 'icon': Icons.menu_book_rounded},
     {'name': 'Auditorium', 'location': 'Block C, Floor 1', 'icon': Icons.theater_comedy_rounded},
     {'name': 'Cafeteria', 'location': 'Ground Floor', 'icon': Icons.restaurant_rounded},
-    {'name': 'Exam Hall', 'location': 'Block B, Floor 2', 'icon': Icons.edit_document},
+    {'name': 'Exam Cell', 'location': 'Block B, Floor 2', 'icon': Icons.edit_document},
     {'name': 'Sports Room', 'location': 'Block C, Floor 1', 'icon': Icons.sports_basketball_rounded},
     {'name': 'Seminar Hall', 'location': 'Block B, Floor 3', 'icon': Icons.co_present_rounded},
   ];
