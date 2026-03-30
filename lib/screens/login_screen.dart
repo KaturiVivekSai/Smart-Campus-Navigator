@@ -11,22 +11,30 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   String selectedRole = 'Student'; // Student, Staff, Parent, Guest
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   final List<Map<String, dynamic>> roles = [
-    {'name': 'Student', 'icon': Icons.school_outlined},
-    {'name': 'Staff', 'icon': Icons.badge_outlined},
-    {'name': 'Parent', 'icon': Icons.family_restroom_outlined},
-    {'name': 'Guest', 'icon': Icons.person_search_outlined},
+    {'name': 'Student', 'icon': Icons.school_rounded, 'color': Color(0xFF2F80ED)},
+    {'name': 'Staff', 'icon': Icons.badge_rounded, 'color': Color(0xFF9B51E0)},
+    {'name': 'Parent', 'icon': Icons.family_restroom_rounded, 'color': Color(0xFF27AE60)},
+    {'name': 'Guest', 'icon': Icons.person_search_rounded, 'color': Color(0xFFF2994A)},
   ];
 
   void _handleLogin() {
-    if (selectedRole == 'Student' || selectedRole == 'Staff') {
+    bool isCredentialRequired = (selectedRole == 'Student' || selectedRole == 'Staff');
+    
+    if (isCredentialRequired) {
       if (_formKey.currentState!.validate()) {
-        // Mock validation
-        authService.login(selectedRole);
-        Navigator.pushReplacementNamed(context, '/home');
+        // Mock validation logic
+        if (_usernameController.text.isNotEmpty && _passwordController.text.length >= 6) {
+          authService.login(selectedRole);
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid username or password')),
+          );
+        }
       }
     } else {
       // Parent or Guest - direct login
@@ -38,14 +46,15 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     bool isCredentialRequired = (selectedRole == 'Student' || selectedRole == 'Staff');
+    Color activeColor = roles.firstWhere((r) => r['name'] == selectedRole)['color'];
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
           onPressed: () => Navigator.pushReplacementNamed(context, '/'),
           tooltip: 'Back to Splash',
         ),
@@ -57,88 +66,99 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16),
+              const SizedBox(height: 10),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2F80ED).withOpacity(0.1),
+                  color: activeColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.lock_person_rounded, size: 64, color: Color(0xFF2F80ED)),
+                child: Icon(
+                  roles.firstWhere((r) => r['name'] == selectedRole)['icon'],
+                  size: 64,
+                  color: activeColor,
+                ),
               ),
               const SizedBox(height: 24),
               const Text(
-                'Sign In',
+                'Welcome Back',
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Select your role to customized experience',
+                'Please select your role and sign in',
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
               const SizedBox(height: 32),
               
-              // Role Selector
-              SizedBox(
-                height: 100,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: roles.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    bool isSelected = selectedRole == roles[index]['name'];
-                    return GestureDetector(
-                      onTap: () => setState(() => selectedRole = roles[index]['name']),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: 90,
-                        decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF2F80ED) : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFF2F80ED) : Colors.transparent,
-                            width: 2,
-                          ),
-                          boxShadow: isSelected ? [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))] : [],
+              // Role Selector Grid
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.8,
+                ),
+                itemCount: roles.length,
+                itemBuilder: (context, index) {
+                  bool isSelected = selectedRole == roles[index]['name'];
+                  return GestureDetector(
+                    onTap: () => setState(() => selectedRole = roles[index]['name']),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      decoration: BoxDecoration(
+                        color: isSelected ? roles[index]['color'] : Colors.grey[50],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected ? roles[index]['color'] : Colors.grey[200]!,
+                          width: 2,
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              roles[index]['icon'],
+                        boxShadow: isSelected 
+                          ? [BoxShadow(color: roles[index]['color'].withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))] 
+                          : [],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            roles[index]['icon'],
+                            color: isSelected ? Colors.white : Colors.grey[600],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            roles[index]['name'],
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                               color: isSelected ? Colors.white : Colors.grey[600],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              roles[index]['name'],
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.white : Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
               
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
               
+              // Input Fields
               if (isCredentialRequired) ...[
                 TextFormField(
-                  controller: _emailController,
+                  controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: 'Username or Email',
-                    prefixIcon: const Icon(Icons.person_outline),
+                    labelText: 'Username',
+                    prefixIcon: Icon(Icons.person_outline, color: activeColor),
                     filled: true,
                     fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: activeColor, width: 2)),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter username';
+                    if (value == null || value.isEmpty) return 'Username is required';
                     return null;
                   },
                 ),
@@ -148,14 +168,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline, color: activeColor),
                     filled: true,
                     fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: activeColor, width: 2)),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter password';
-                    if (value.length < 6) return 'Password too short';
+                    if (value == null || value.isEmpty) return 'Password is required';
+                    if (value.length < 6) return 'Minimum 6 characters';
                     return null;
                   },
                 ),
@@ -163,17 +184,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: activeColor.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: activeColor.withOpacity(0.1)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: Color(0xFF2F80ED)),
+                      Icon(Icons.info_outline, color: activeColor),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
-                          'As a $selectedRole, you can access the campus map directly without credentials.',
-                          style: const TextStyle(color: Color(0xFF2F80ED), fontWeight: FontWeight.w500),
+                          'Continue as $selectedRole to access basic campus navigation features directly.',
+                          style: TextStyle(color: activeColor, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ],
@@ -189,13 +211,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F80ED),
+                    backgroundColor: activeColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     elevation: 4,
                   ),
                   child: Text(
-                    isCredentialRequired ? 'Login' : 'Continue as $selectedRole',
+                    isCredentialRequired ? 'Log In' : 'Continue',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -206,12 +228,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Don\'t have an account? '),
+                    const Text('Not registered yet? '),
                     GestureDetector(
                       onTap: () => Navigator.pushNamed(context, '/register'),
-                      child: const Text(
-                        'Register Now',
-                        style: TextStyle(color: Color(0xFF2F80ED), fontWeight: FontWeight.bold),
+                      child: Text(
+                        'Create Account',
+                        style: TextStyle(color: activeColor, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -223,5 +245,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

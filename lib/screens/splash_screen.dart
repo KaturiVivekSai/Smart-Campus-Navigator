@@ -17,18 +17,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void initState() {
     super.initState();
     
-    // Logo Animation
+    // Logo Pulsing Animation
     _logoController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+    _logoScale = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeInOut),
     );
-    _logoScale = CurvedAnimation(parent: _logoController, curve: Curves.elasticOut);
-    _logoController.forward();
 
-    // Progress Bar Animation (0 to 100% in 3 seconds)
+    // Progress Bar Animation (0 to 100% in 2 seconds)
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 2),
     );
     _progressAnimation = Tween<double>(begin: 0, end: 1).animate(_progressController)
       ..addListener(() {
@@ -63,14 +64,21 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           children: [
             const Spacer(flex: 3),
             
-            // Interactive Logo
+            // Interactive Pulsing Logo
             ScaleTransition(
               scale: _logoScale,
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2F80ED).withOpacity(0.1),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2F80ED).withOpacity(0.2),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.explore_rounded,
@@ -114,7 +122,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: _progressAnimation.value,
-                    minHeight: 10,
+                    minHeight: 12,
                     backgroundColor: Colors.grey[200],
                     valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2F80ED)),
                   ),
@@ -123,10 +131,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 Text(
                   '$percentage%',
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2F80ED),
                   ),
+                ),
+                const Text(
+                  'Loading campus data...',
+                  style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
                 ),
               ],
             ),
@@ -134,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             const Spacer(flex: 1),
             
             const Text(
-              'v1.1.0',
+              'v1.2.0',
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             

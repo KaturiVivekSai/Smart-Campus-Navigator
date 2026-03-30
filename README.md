@@ -1,54 +1,63 @@
-# Smart Campus Navigator 🚀
+# Smart Campus Navigator
 
-### 🔗 [Live Demo - Your Link Here](https://your-username.github.io/your-repository-name/)
-
-A premium, interactive Flutter application designed for seamless campus navigation and management. This project features role-based authentication, a 3-floor interactive map, and a glassmorphism UI.
+A premium, interactive Flutter application designed to simplify navigation within a college campus. The app provides a seamless experience for students, staff, parents, and guests, featuring a multi-floor interactive map and role-based access.
 
 ## ✨ Key Features
 
-- **🛡️ Role-Based Access**: 4 distinct roles (Student, Staff, Parent, Guest) with appropriate permissions and navigation paths.
-- **🗺️ Interactive Map**: 
-    - 3-floor navigation (Floor 1, 2, 3).
-    - Simulated pathfinding to 'Computer Lab 3' with a **live green path**.
-    - "Speak Out Path" button with voice-guided navigation UI.
-    - Full-screen "Start Navigating" mode hiding bottom navigation for focus.
-- **✨ Premium UI/UX**:
-    - Animated **0-100% Splash Screen** with scaling logo.
-    - Glassmorphism design elements and modern Blue/White theme.
-    - Fully responsive layouts compatible with both **Light & Dark Mode**.
-    - Micro-animations for transitions and status changes.
-- **👤 Profile Management**: Edit profile, saved locations, and granular app settings.
-- **📊 Quick Access Panels**: 
-    - **Admin Office**: Direct link to administration info.
-    - **Visited Recently**: One-tap access to previous destinations.
-- **🆘 Help & Emergency**:
-    - Functional feedback form with category selection.
-    - Immediate emergency assistance routing.
+### 1. Interactive Splash Screen
+- **Pulsing Logo**: Smooth animations for a modern feel.
+- **Fast Loading**: 0-100% progress tracking in under 2 seconds.
+
+### 2. Role-Based Authentication
+- **Tailored Experience**: 4 distinct user roles (Student, Staff, Parent, Guest).
+- **Direct Login**: Parents and Guests can access maps immediately without credentials.
+- **Secure Access**: Robust validation and secure logout redirection for Students and Staff.
+
+### 3. Dynamic Interactive Map
+- **Indoor Navigation**: Navigate specifically within the campus across **3 floors**.
+- **Pathfinding**: High-visibility green paths to indoor locations (e.g., Computer Lab 3 on Floor 3).
+- **Live Guidance**: Simulated user movement along paths with voice and mic integration.
+- **Smart UI**: Auto-hiding navigation bars during active travel for a focused experience.
+
+### 4. Smart Search & Discovery
+- **Voice Search**: Integrated mic for hands-free location discovery.
+- **Recent Places**: Quickly return to frequently visited spots.
+- **Quick Categories**: Explore labs, libraries, offices, and more.
+
+### 5. Campus Help & Profile
+- **Feedback Center**: Functional form to submit suggestions and report issues with success alerts.
+- **Profile Management**: Modern edit profile functionality and saved locations.
+- **App Settings**: Customizable app preferences including font size and style.
 
 ## 🛠️ Technology Stack
-
-- **Flutter**: Core application framework.
-- **Dart**: Programming language.
-- **Git**: Professional version control.
-- **GitHub**: Source code hosting.
-
-## 📱 Screen Breakdown
-
-1. **Splash Screen**: Animated loading (3 seconds) + scaling branding logo.
-2. **Login Screen**: Role selection, credential validation for Students/Staff, guest entry.
-3. **Register Screen**: Form validation for new users.
-4. **Home Screen**: Personalized greetings, quick access cards, and interactive lists.
-5. **Map Screen**: Indoor campus map, floor switching, and pathfinding.
-6. **Search Screen**: Recent search history and categorized points of interest.
-7. **Profile Screen**: User settings, edit mode, and functional logout.
-8. **Help Screen**: Feedback system with submission success notifications.
+- **Framework**: Flutter (Dart)
+- **State Management**: StatefulWidget with TickerProvider (Animations)
+- **UI Design**: Material 3 with Custom Drawing (Canvas)
 
 ## 🚀 Getting Started
 
-1.  **Environment**: Flutter SDK 3.x+ installed.
-2.  **Clone**: `git clone [repository-url]`
-3.  **Packages**: `flutter pub get`
-4.  **Run**: `flutter run`
+### Prerequisites
+- Flutter SDK (latest version)
+- Android Studio or VS Code with Flutter extension
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/smart-campus-navigator.git
+   ```
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+3. Run the app:
+   ```bash
+   flutter run
+   ```
+
+## 📂 Project Structure
+- `lib/screens/`: Contains all 9 functional screens.
+- `lib/main.dart`: App entry point and routing logic.
+- `lib/services/`: Mock authentication and campus data services.
 
 ---
-*Created with ❤️ by Antigravity AI*
+*Developed for a smarter, more connected campus experience.*
