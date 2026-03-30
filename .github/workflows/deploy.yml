@@ -7,10 +7,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -20,18 +21,26 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.0' # Specifying a version for stability
           cache: true
 
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --release --base-href "/Vivek-Sai/" --web-renderer html
+        run: flutter build web --release --base-href "/Vivek-Sai/" --web-renderer html --no-tree-shake-icons
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
-          publish_branch: gh-pages
+          path: 'build/web'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
