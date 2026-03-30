@@ -10,6 +10,17 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: (role == 'Parent' || role == 'Guest') ? AppBar(
+        title: const Text('Smart Navigator', style: TextStyle(color: Colors.white, fontSize: 16)),
+        backgroundColor: const Color(0xFF2F80ED),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+          onPressed: () {
+            authService.logout();
+            Navigator.pushReplacementNamed(context, '/login');
+          },
+        ),
+      ) : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -67,10 +78,10 @@ class HomeScreen extends StatelessWidget {
               const Text('Popular Destinations', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               _buildDestinationItem(context, 'Computer Lab 3', 'Block A, Floor 3', Icons.computer_rounded),
-              _buildDestinationItem(context, 'Library', 'Block B, Floor 1', Icons.menu_book_rounded),
+              _buildDestinationItem(context, 'Physics Lab', 'Block B, Floor 1', Icons.science),
               _buildDestinationItem(context, 'Admin Office', 'Admin Block, Floor 1', Icons.business_rounded),
-              _buildDestinationItem(context, 'Principal Room', 'Admin Block, Floor 2', Icons.person_rounded),
-              _buildDestinationItem(context, 'Cafeteria', 'Ground Floor', Icons.restaurant_rounded),
+              _buildDestinationItem(context, 'Principal Room', 'Admin Block, Ground', Icons.person_rounded),
+              _buildDestinationItem(context, 'Cafeteria', 'Ground', Icons.restaurant_rounded),
 
               const SizedBox(height: 32),
 
@@ -92,7 +103,16 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
+
+              // Signature
+              Center(
+                child: Text(
+                  '@developed by Katuri Vivek Sai',
+                  style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

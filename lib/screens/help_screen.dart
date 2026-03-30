@@ -49,6 +49,15 @@ class _HelpScreenState extends State<HelpScreen> {
     }
   }
 
+  String _getFeedbackHint() {
+    switch (_selectedCategory) {
+      case 'Bug Report': return 'Describe the error or glitch you encountered in the app...';
+      case 'Map Issue': return 'Tell us what location or path is incorrect on the map...';
+      case 'General Help': return 'How can we assist you today?';
+      default: return 'What feature would you like to see?';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +130,23 @@ class _HelpScreenState extends State<HelpScreen> {
               ),
               const SizedBox(height: 24),
 
-              const Text('Your Feedback', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text('Your $_selectedCategory', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F4FF),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFF2F80ED).withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: Color(0xFF2F80ED), size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(_getFeedbackHint(), style: const TextStyle(color: Color(0xFF1565C0), fontSize: 12))),
+                  ],
+                ),
+              ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _feedbackController,
@@ -152,6 +177,27 @@ class _HelpScreenState extends State<HelpScreen> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 3,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF2F80ED),
+        onTap: (i) {
+          switch (i) {
+            case 0: Navigator.pushReplacementNamed(context, '/home'); break;
+            case 1: Navigator.pushNamed(context, '/map'); break;
+            case 2: Navigator.pushNamed(context, '/search'); break;
+            case 3: break;
+            case 4: Navigator.pushNamed(context, '/profile'); break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+        ],
       ),
     );
   }

@@ -9,7 +9,46 @@ import 'screens/emergency_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/help_screen.dart';
 
-// --- Simple State Management ---
+// --- Global Session State ---
+class UserSession extends ChangeNotifier {
+  static final UserSession _instance = UserSession._internal();
+  factory UserSession() => _instance;
+  UserSession._internal();
+
+  String userName = 'Alex Johnson';
+  String email = 'alex.j@campus.edu';
+  String department = 'Computer Science';
+  
+  double _fontSize = 14.0;
+  String _fontStyle = 'Default';
+  int _selectedAvatarIndex = -1;
+
+  double get fontSize => _fontSize;
+  String get fontStyle => _fontStyle;
+  int get selectedAvatarIndex => _selectedAvatarIndex;
+
+  void updateProfile(String name, String mail, String dept) {
+    userName = name;
+    email = mail;
+    department = dept;
+    notifyListeners();
+  }
+
+  void updateSettings(double size, String font) {
+    _fontSize = size;
+    _fontStyle = font;
+    notifyListeners();
+  }
+
+  void updateAvatar(int index) {
+    _selectedAvatarIndex = index;
+    notifyListeners();
+  }
+}
+
+final userSession = UserSession();
+
+// --- Auth State ---
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
@@ -46,7 +85,7 @@ class SmartCampusNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: authService,
+      listenable: Listenable.merge([authService, userSession]),
       builder: (context, _) {
         return MaterialApp(
           title: 'Smart Campus Navigator',
@@ -60,12 +99,16 @@ class SmartCampusNavigator extends StatelessWidget {
               surface: const Color(0xFFFAFAFA),
               brightness: Brightness.light,
             ),
-            fontFamily: 'Poppins',
+            fontFamily: userSession.fontStyle == 'Default' ? 'Poppins' : 'Georgia',
+            textTheme: TextTheme(
+              bodyMedium: TextStyle(fontSize: userSession.fontSize),
+              bodySmall: TextStyle(fontSize: userSession.fontSize - 2),
+              bodyLarge: TextStyle(fontSize: userSession.fontSize + 2),
+            ),
           ),
           themeMode: ThemeMode.light,
           initialRoute: '/',
           builder: (context, child) {
-            // Force mobile-like layout on all screen sizes
             return Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 430),

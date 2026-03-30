@@ -1,20 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
 import '../main.dart';
-
-class UserSession {
-  static final UserSession _instance = UserSession._();
-  factory UserSession() => _instance;
-  UserSession._();
-  String userName = 'Alex Johnson';
-  String email = 'alex.j@campus.edu';
-  String department = 'Computer Science';
-  double fontSize = 14.0;
-  String fontStyle = 'Default';
-  int selectedAvatarIndex = -1;
-}
-
-final userSession = UserSession();
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -37,11 +22,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 12, mainAxisSpacing: 12),
             itemCount: 8,
             itemBuilder: (c, i) => GestureDetector(
-              onTap: () { setState(() => userSession.selectedAvatarIndex = i); Navigator.pop(c); },
+              onTap: () { 
+                userSession.updateAvatar(i);
+                Navigator.pop(c); 
+              },
               child: CircleAvatar(backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=${i + 1}'), radius: 30),
             ),
           ),
           const SizedBox(height: 16),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: ListTile(
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Opening native File Picker...'), backgroundColor: Color(0xFF27AE60)));
+              },
+              leading: const Icon(Icons.upload_file_rounded, color: Color(0xFF27AE60)),
+              title: const Text('Upload from Drive/Local File', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
         ]),
       ),
     );
@@ -124,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _tf('Email', e, Icons.email_rounded), const SizedBox(height: 14),
         _tf('Department', d, Icons.business_rounded), const SizedBox(height: 28),
         SizedBox(width: double.infinity, height: 52, child: ElevatedButton(onPressed: () {
-          setState(() { userSession.userName = n.text; userSession.email = e.text; userSession.department = d.text; });
+          userSession.updateProfile(n.text, e.text, d.text);
           Navigator.pop(c); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated!'), backgroundColor: Color(0xFF27AE60)));
         }, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2F80ED), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
           child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
@@ -138,15 +137,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loc('Library', 'Block B, Floor 1'), _loc('Computer Lab 3', 'Block A, Floor 3'), _loc('Cafeteria', 'Ground Floor'), const SizedBox(height: 16),
     ])));
 
-  void _settings() => showModalBottomSheet(context: context, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
-    builder: (c) => StatefulBuilder(builder: (c, ss) => Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
-      const Text('App Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)), const SizedBox(height: 24),
-      ListTile(title: const Text('Font Style'), subtitle: Text(userSession.fontStyle), trailing: const Icon(Icons.font_download_rounded),
-        onTap: () { ss(() => userSession.fontStyle = userSession.fontStyle == 'Default' ? 'Serif' : 'Default'); setState(() {}); }),
-      ListTile(title: const Text('Text Size'), subtitle: Slider(value: userSession.fontSize, min: 12, max: 24, divisions: 6,
-        onChanged: (v) { ss(() => userSession.fontSize = v); setState(() {}); }), trailing: Text('${userSession.fontSize.toInt()}px')),
-      const SizedBox(height: 24),
-    ]))));
+  void _settings() {
+    double tempSize = userSession.fontSize;
+    String tempStyle = userSession.fontStyle;
+    
+    showModalBottomSheet(context: context, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+      builder: (c) => StatefulBuilder(builder: (c, ss) => Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Text('App Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)), const SizedBox(height: 24),
+        ListTile(title: const Text('Font Style'), subtitle: Text(tempStyle), trailing: const Icon(Icons.font_download_rounded),
+          onTap: () { 
+            ss(() => tempStyle = tempStyle == 'Default' ? 'Serif' : 'Default'); 
+            userSession.updateSettings(tempSize, tempStyle);
+          }),
+        ListTile(title: const Text('Text Size'), subtitle: Slider(value: tempSize, min: 12, max: 24, divisions: 6,
+          onChanged: (v) { 
+            ss(() => tempSize = v); 
+            userSession.updateSettings(tempSize, tempStyle);
+          }), trailing: Text('${tempSize.toInt()}px')),
+        const SizedBox(height: 24),
+      ]))));
+  }
 
   void _about() => showModalBottomSheet(context: context, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
     builder: (c) => SingleChildScrollView(padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -158,7 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text('About', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), SizedBox(height: 8),
           Text('Smart Campus Navigator is a premium interactive navigation app for college campuses with multi-floor maps, role-based access, pathfinding, and voice guidance.', style: TextStyle(fontSize: 13, height: 1.5)),
           SizedBox(height: 12), Text('Features:', style: TextStyle(fontWeight: FontWeight.bold)),
-          Text('• Interactive building map with 3 floors'), Text('• Role-based authentication'), Text('• Real-time pathfinding'), Text('• Voice guidance'), Text('• Emergency SOS'), Text('• Search with live suggestions'),
+          Text('• Interactive building map with 3 floors'), Text('• Role-based authentication'), Text('• Real-time map navigation'), Text('• Voice guidance & feedback system'),
           SizedBox(height: 12), Text('Documentation:', style: TextStyle(fontWeight: FontWeight.bold)),
           Text('📄 User Guide: Map navigation & floor switching'), Text('📄 Admin Guide: Location management'), Text('📄 API: Campus system integration'),
         ])),
