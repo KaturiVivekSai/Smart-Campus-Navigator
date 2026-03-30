@@ -27,28 +27,20 @@ class _HelpScreenState extends State<HelpScreen> {
               Text('Feedback Submitted', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
-          content: const Text(
-            'Thank you for your valuable feedback! We will process it and improve our campus experience.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.black54),
-          ),
+          content: const Text('Thank you! We will improve Smart Campus Navigator based on your feedback.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54)),
           actions: [
             SizedBox(
               width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    _usernameController.clear();
-                    _feedbackController.clear();
-                    _selectedCategory = 'Suggestion';
-                  });
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFF2F80ED),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() { _usernameController.clear(); _feedbackController.clear(); _selectedCategory = 'Suggestion'; });
+                  },
+                  style: TextButton.styleFrom(backgroundColor: const Color(0xFF2F80ED), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  child: const Text('Great, thanks!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
-                child: const Text('Great, thanks!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -65,10 +57,7 @@ class _HelpScreenState extends State<HelpScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text('Feedback Center', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2F80ED)),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2F80ED)), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -89,12 +78,12 @@ class _HelpScreenState extends State<HelpScreen> {
                   children: [
                     Text('How can we help?', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                     SizedBox(height: 8),
-                    Text('Your feedback helps us make the campus movement smoother for everyone.', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text('Help us make Smart Campus Navigator better.', style: TextStyle(color: Colors.white70, fontSize: 13)),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               const Text('Select Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 12),
               Wrap(
@@ -102,27 +91,27 @@ class _HelpScreenState extends State<HelpScreen> {
                 runSpacing: 12,
                 children: ['Suggestion', 'Bug Report', 'Map Issue', 'General Help'].map((category) {
                   bool isSelected = _selectedCategory == category;
-                  return InkWell(
-                    onTap: () => setState(() => _selectedCategory = category),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF2F80ED) : Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: isSelected ? const Color(0xFF2F80ED) : Colors.grey[200]!),
-                      ),
-                      child: Text(
-                        category,
-                        style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600, fontSize: 13),
+                  return MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: InkWell(
+                      onTap: () => setState(() => _selectedCategory = category),
+                      borderRadius: BorderRadius.circular(12),
+                      hoverColor: const Color(0xFF2F80ED).withOpacity(0.08),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFF2F80ED) : Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isSelected ? const Color(0xFF2F80ED) : Colors.grey[200]!),
+                        ),
+                        child: Text(category, style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600, fontSize: 13)),
                       ),
                     ),
                   );
                 }).toList(),
               ),
-              
               const SizedBox(height: 32),
-              
+
               const Text('Username', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 12),
               TextFormField(
@@ -130,32 +119,33 @@ class _HelpScreenState extends State<HelpScreen> {
                 decoration: _inputDecoration('Enter your name', Icons.person_outline_rounded),
                 validator: (value) => (value == null || value.isEmpty) ? 'Name is required' : null,
               ),
-              
               const SizedBox(height: 24),
-              
+
               const Text('Your Feedback', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _feedbackController,
                 maxLines: 5,
                 decoration: _inputDecoration('Write your feedback here...', Icons.chat_bubble_outline_rounded),
-                validator: (value) => (value == null || value.isEmpty) ? 'Feedback content is required' : null,
+                validator: (value) => (value == null || value.isEmpty) ? 'Feedback is required' : null,
               ),
-              
-              const SizedBox(height: 48),
-              
+              const SizedBox(height: 40),
+
               SizedBox(
                 width: double.infinity,
                 height: 60,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F80ED),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    elevation: 4,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: ElevatedButton(
+                    onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2F80ED),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      elevation: 4,
+                    ),
+                    child: const Text('Submit Feedback', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  child: const Text('Submit Feedback', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 40),

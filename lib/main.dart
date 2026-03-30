@@ -62,18 +62,17 @@ class SmartCampusNavigator extends StatelessWidget {
             ),
             fontFamily: 'Poppins',
           ),
-          darkTheme: ThemeData(
-            useMaterial3: true,
-            brightness: Brightness.dark,
-            primaryColor: const Color(0xFF2F80ED),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF2F80ED),
-              brightness: Brightness.dark,
-            ),
-            fontFamily: 'Poppins',
-          ),
-          themeMode: ThemeMode.system,
+          themeMode: ThemeMode.light,
           initialRoute: '/',
+          builder: (context, child) {
+            // Force mobile-like layout on all screen sizes
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: child,
+              ),
+            );
+          },
           routes: {
             '/': (context) => const SplashScreen(),
             '/login': (context) => const LoginScreen(),

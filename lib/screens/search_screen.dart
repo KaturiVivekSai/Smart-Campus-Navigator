@@ -9,11 +9,27 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final List<Map<String, dynamic>> _recentPlaces = [
-    {'name': 'Computer Lab 3', 'location': 'Block A, Floor 3', 'icon': Icons.computer_rounded, 'time': '2h ago'},
-    {'name': 'Main Admin Office', 'location': 'Block A, Ground Floor', 'icon': Icons.business_rounded, 'time': '5h ago'},
-    {'name': 'Central Library', 'location': 'Block C, Floor 1', 'icon': Icons.menu_book_rounded, 'time': 'Yesterday'},
+  String _query = '';
+
+  final List<Map<String, dynamic>> _allPlaces = [
+    {'name': 'Computer Lab 1', 'location': 'Block A, Floor 1', 'icon': Icons.computer_rounded},
+    {'name': 'Computer Lab 2', 'location': 'Block A, Floor 2', 'icon': Icons.computer_rounded},
+    {'name': 'Computer Lab 3', 'location': 'Block A, Floor 3', 'icon': Icons.computer_rounded},
+    {'name': 'Admin Office', 'location': 'Admin Block, Floor 1', 'icon': Icons.business_rounded},
+    {'name': 'Principal Room', 'location': 'Admin Block, Floor 2', 'icon': Icons.person_rounded},
+    {'name': 'Staff Room', 'location': 'Admin Block, Floor 2', 'icon': Icons.groups_rounded},
+    {'name': 'Library', 'location': 'Block B, Floor 1', 'icon': Icons.menu_book_rounded},
+    {'name': 'Auditorium', 'location': 'Block C, Floor 1', 'icon': Icons.theater_comedy_rounded},
+    {'name': 'Cafeteria', 'location': 'Ground Floor', 'icon': Icons.restaurant_rounded},
+    {'name': 'Exam Hall', 'location': 'Block B, Floor 2', 'icon': Icons.edit_document},
+    {'name': 'Sports Room', 'location': 'Block C, Floor 1', 'icon': Icons.sports_basketball_rounded},
+    {'name': 'Seminar Hall', 'location': 'Block B, Floor 3', 'icon': Icons.co_present_rounded},
   ];
+
+  List<Map<String, dynamic>> get _filteredPlaces {
+    if (_query.isEmpty) return [];
+    return _allPlaces.where((p) => p['name'].toString().toLowerCase().contains(_query.toLowerCase())).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +46,8 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: Column(
         children: [
-          // Premium Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey[100],
@@ -42,14 +57,14 @@ class _SearchScreenState extends State<SearchScreen> {
               child: TextField(
                 controller: _searchController,
                 autofocus: true,
+                onChanged: (val) => setState(() => _query = val),
                 decoration: InputDecoration(
-                  hintText: 'Search Buildings, Labs, or People...',
+                  hintText: 'Type to search locations...',
                   hintStyle: const TextStyle(fontSize: 15, color: Colors.grey),
                   prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF2F80ED), size: 24),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.mic_none_rounded, color: Color(0xFF2F80ED), size: 24),
-                    onPressed: () {},
-                  ),
+                  suffixIcon: _query.isNotEmpty
+                    ? IconButton(icon: const Icon(Icons.clear_rounded, color: Colors.grey), onPressed: () { setState(() { _query = ''; _searchController.clear(); }); })
+                    : IconButton(icon: const Icon(Icons.mic_none_rounded, color: Color(0xFF2F80ED), size: 24), onPressed: () {}),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -59,116 +74,106 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
           ),
-          
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Recently Visited',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Recent Places List
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _recentPlaces.length,
-                    separatorBuilder: (context, index) => const Divider(height: 32, color: Color(0xFFF1F1F1)),
-                    itemBuilder: (context, index) {
-                      final place = _recentPlaces[index];
-                      return InkWell(
-                        onTap: () => Navigator.pushNamed(context, '/map', arguments: place['name']),
-                        borderRadius: BorderRadius.circular(12),
+
+          // Live suggestions
+          if (_filteredPlaces.isNotEmpty)
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: _filteredPlaces.length,
+                itemBuilder: (context, index) {
+                  final place = _filteredPlaces[index];
+                  return MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: InkWell(
+                      onTap: () => Navigator.pushNamed(context, '/map', arguments: place['name']),
+                      borderRadius: BorderRadius.circular(12),
+                      hoverColor: const Color(0xFF2F80ED).withOpacity(0.05),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF2F80ED).withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Icon(place['icon'], color: const Color(0xFF2F80ED), size: 24),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(color: const Color(0xFF2F80ED).withOpacity(0.08), borderRadius: BorderRadius.circular(12)),
+                              child: Icon(place['icon'], color: const Color(0xFF2F80ED), size: 22),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(place['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                  const SizedBox(height: 4),
-                                  Text(place['location'], style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                                  Text(place['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                  Text(place['location'], style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                                 ],
                               ),
                             ),
-                            Text(place['time'], style: TextStyle(color: Colors.grey[400], fontSize: 11)),
+                            const Icon(Icons.north_east_rounded, color: Color(0xFF2F80ED), size: 16),
                           ],
                         ),
-                      );
-                    },
-                  ),
-                  
-                  const SizedBox(height: 40),
-                  const Text(
-                    'Browse Categories',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Categories Grid
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 2.5,
-                    children: [
-                      _buildCategoryItem(Icons.school_rounded, 'Academics', Colors.blue),
-                      _buildCategoryItem(Icons.science_rounded, 'Laboratories', Colors.purple),
-                      _buildCategoryItem(Icons.restaurant_rounded, 'Cafeteria', Colors.orange),
-                      _buildCategoryItem(Icons.sports_basketball_rounded, 'Sports Complex', Colors.green),
-                      _buildCategoryItem(Icons.local_library_rounded, 'E-Library', Colors.indigo),
-                      _buildCategoryItem(Icons.meeting_room_rounded, 'Admin Bloc', Colors.teal),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+          else if (_query.isNotEmpty)
+            const Expanded(child: Center(child: Text('No locations found', style: TextStyle(color: Colors.grey))))
+          else
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Quick Categories', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.5,
+                      children: [
+                        _buildCategoryItem(Icons.school_rounded, 'Academics', Colors.blue),
+                        _buildCategoryItem(Icons.science_rounded, 'Labs', Colors.purple),
+                        _buildCategoryItem(Icons.restaurant_rounded, 'Cafeteria', Colors.orange),
+                        _buildCategoryItem(Icons.sports_basketball_rounded, 'Sports', Colors.green),
+                        _buildCategoryItem(Icons.local_library_rounded, 'Library', Colors.indigo),
+                        _buildCategoryItem(Icons.meeting_room_rounded, 'Admin', Colors.teal),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 
   Widget _buildCategoryItem(IconData icon, String label, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.grey[100]!),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))],
-      ),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
       child: InkWell(
-        onTap: () => Navigator.pushNamed(context, '/map', arguments: label),
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        onTap: () {
+          setState(() { _query = label; _searchController.text = label; });
+        },
+        borderRadius: BorderRadius.circular(16),
+        hoverColor: color.withOpacity(0.08),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: color, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              const SizedBox(width: 8),
+              Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
             ],
           ),
         ),
