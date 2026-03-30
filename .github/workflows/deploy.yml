@@ -28,11 +28,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/" --web-renderer canvaskit --no-tree-shake-icons
-
-      - name: Verify Build
-        run: ls -R build/web
-
+        run: flutter build web --release --base-href "/Vivek-Sai/" --web-renderer canvaskit --no-tree-shake-icons
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
