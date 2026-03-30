@@ -27,8 +27,14 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Regenerate Web Project
+        run: flutter create . --platforms web --overwrite
+
       - name: Build Web
-        run: flutter build web --release --base-href "/Vivek-Sai/" --web-renderer canvaskit --no-tree-shake-icons
+        run: |
+          sleep 2
+          flutter build web --release --base-href "/Vivek-Sai/" --web-renderer canvaskit --no-tree-shake-icons
+
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
