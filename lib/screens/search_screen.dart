@@ -74,8 +74,6 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
           ),
-
-          // Live suggestions
           if (_filteredPlaces.isNotEmpty)
             Expanded(
               child: ListView.builder(
@@ -150,6 +148,27 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 2,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF2F80ED),
+        onTap: (i) {
+          switch (i) {
+            case 0: Navigator.pushReplacementNamed(context, '/home'); break;
+            case 1: Navigator.pushNamed(context, '/map'); break;
+            case 2: break;
+            case 3: Navigator.pushNamed(context, '/help'); break;
+            case 4: Navigator.pushNamed(context, '/profile'); break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+        ],
+      ),
     );
   }
 
@@ -157,9 +176,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: InkWell(
-        onTap: () {
-          setState(() { _query = label; _searchController.text = label; });
-        },
+        onTap: () { setState(() { _query = label; _searchController.text = label; }); },
         borderRadius: BorderRadius.circular(16),
         hoverColor: color.withOpacity(0.08),
         child: Container(
