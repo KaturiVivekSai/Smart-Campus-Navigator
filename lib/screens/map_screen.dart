@@ -349,7 +349,7 @@ class BuildingMapPainter extends CustomPainter {
     }
     
     // Draw User Location as a Triangle
-    if (!isNavigating || floor == currentFloor) {
+    if (!isNavigating || true) {
       canvas.drawCircle(Offset(w * userX, h * userY), 16 * pulseScale, Paint()..color = const Color(0xFF2F80ED).withOpacity(0.2));
       canvas.save();
       canvas.translate(w * userX, h * userY);
