@@ -8,6 +8,7 @@ import 'screens/search_screen.dart';
 import 'screens/emergency_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/help_screen.dart';
+import 'screens/docs_screen.dart';
 
 // --- Global Session State ---
 class UserSession extends ChangeNotifier {
@@ -126,6 +127,7 @@ class SmartCampusNavigator extends StatelessWidget {
             '/profile': (context) => _protectedRoute(const ProfileScreen()),
             '/emergency': (context) => _protectedRoute(const EmergencyScreen()),
             '/help': (context) => _protectedRoute(const HelpScreen()),
+            '/docs': (context) => _protectedRoute(const DocsScreen()),
           },
         );
       }

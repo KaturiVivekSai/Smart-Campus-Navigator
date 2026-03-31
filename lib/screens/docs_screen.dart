@@ -1,0 +1,71 @@
+import 'package:flutter/material.dart';
+
+class DocsScreen extends StatelessWidget {
+  const DocsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF2F80ED)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Design Document', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Interactive Design Document',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF2F80ED)),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: const Text(
+                'Placeholder for design document content.\n\nDevelopers can easily update this text to push changes live to the application.\n\nThis content is managed through the codebase and can be integrated with remote config if needed by the admin.',
+                style: TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 4,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF2F80ED),
+        onTap: (i) {
+          switch (i) {
+            case 0: Navigator.pushReplacementNamed(context, '/home'); break;
+            case 1: Navigator.pushNamed(context, '/map'); break;
+            case 2: Navigator.pushNamed(context, '/search'); break;
+            case 3: Navigator.pushNamed(context, '/help'); break;
+            case 4: Navigator.pushNamed(context, '/docs'); break;
+            case 5: break;
+            case 5: Navigator.pushNamed(context, '/profile'); break;
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
+          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
+          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+}

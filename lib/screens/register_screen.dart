@@ -161,7 +161,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) return 'Please enter $label';
-        if (label.contains('Password') && value.length < 6) return 'Minimum 6 characters';
+        if (label.contains('Email') || value.contains('@')) {
+           final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+           if (!emailRegex.hasMatch(value)) return 'Enter a valid email (e.g., test@gmail.com)';
+        }
+        if (label.contains('Password')) {
+          if (value.length < 8) return 'Minimum 8 characters';
+          if (value.contains(' ')) return 'Password cannot contain spaces';
+          final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$');
+          if (!passwordRegex.hasMatch(value)) {
+            return 'Must contain uppercase, lowercase, number & special symbol';
+          }
+        }
         return null;
       },
     );

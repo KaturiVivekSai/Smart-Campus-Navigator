@@ -188,7 +188,8 @@ class _HelpScreenState extends State<HelpScreen> {
             case 1: Navigator.pushNamed(context, '/map'); break;
             case 2: Navigator.pushNamed(context, '/search'); break;
             case 3: break;
-            case 4: Navigator.pushNamed(context, '/profile'); break;
+            case 4: Navigator.pushNamed(context, '/docs'); break;
+            case 5: Navigator.pushNamed(context, '/profile'); break;
           }
         },
         items: const [
@@ -196,6 +197,7 @@ class _HelpScreenState extends State<HelpScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
+          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),

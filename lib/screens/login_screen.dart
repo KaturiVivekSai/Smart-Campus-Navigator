@@ -119,7 +119,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
                     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: activeColor, width: 2)),
                   ),
-                  validator: (value) => (value == null || value.isEmpty) ? 'Username is required' : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Username/Email is required';
+                    if (value.contains('@')) {
+                      final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                      if (!emailRegex.hasMatch(value)) return 'Enter a valid email (e.g., test@gmail.com)';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -135,7 +142,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Password is required';
-                    if (value.length < 6) return 'Minimum 6 characters';
+                    if (value.length < 8) return 'Minimum 8 characters';
+                    if (value.contains(' ')) return 'Password cannot contain spaces';
+                    final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$');
+                    if (!passwordRegex.hasMatch(value)) {
+                      return 'Must contain uppercase, lowercase, number & special symbol';
+                    }
                     return null;
                   },
                 ),
@@ -188,6 +200,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: GestureDetector(
                         onTap: () => Navigator.pushNamed(context, '/register'),
                         child: Text('Create Account', style: TextStyle(color: activeColor, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Forgot Password flow not implemented yet')));
+                        },
+                        child: Text('Forgot username/password?', style: TextStyle(color: activeColor, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],

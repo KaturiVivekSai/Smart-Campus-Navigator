@@ -294,7 +294,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
       BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
       BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
-      BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+      BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
     ]);
 }
 
