@@ -33,9 +33,28 @@ class DocsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey[200]!),
               ),
-              child: const Text(
-                'Placeholder for design document content.\n\nDevelopers can easily update this text to push changes live to the application.\n\nThis content is managed through the codebase and can be integrated with remote config if needed by the admin.',
-                style: TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Placeholder for design document content.',
+                    style: TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'To upload and display your own document, you can:',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '1. Replace this exact `Container` widget with a custom `FutureBuilder` that loads a string.\n'
+                    '2. Add a text or markdown file to your `assets/` directory (e.g., `assets/design_document.txt`).\n'
+                    '3. Update `pubspec.yaml` to include the asset.\n'
+                    '4. Load it here using `rootBundle.loadString(\'assets/design_document.txt\')`.\n'
+                    '\nAlternatively, fetch it from Firebase or an external API for direct live updates without App updates.',
+                    style: TextStyle(fontSize: 14, height: 1.5, color: Colors.black54),
+                  ),
+                ],
               ),
             ),
           ],
@@ -51,18 +70,16 @@ class DocsScreen extends StatelessWidget {
             case 1: Navigator.pushNamed(context, '/map'); break;
             case 2: Navigator.pushNamed(context, '/search'); break;
             case 3: Navigator.pushNamed(context, '/help'); break;
-            case 4: Navigator.pushNamed(context, '/docs'); break;
-            case 5: break;
+            case 4: break;
             case 5: Navigator.pushNamed(context, '/profile'); break;
           }
         },
-        items: const [
+                items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
-          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
-          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
+          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Design Doc'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),

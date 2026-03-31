@@ -165,12 +165,12 @@ class _SearchScreenState extends State<SearchScreen> {
             case 5: Navigator.pushNamed(context, '/profile'); break;
           }
         },
-        items: const [
+                items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.feedback_outlined), label: 'Help'),
-          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Docs'),
+          BottomNavigationBarItem(icon: Icon(Icons.description_outlined), label: 'Design Doc'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),
