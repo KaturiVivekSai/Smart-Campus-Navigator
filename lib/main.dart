@@ -16,9 +16,9 @@ class UserSession extends ChangeNotifier {
   factory UserSession() => _instance;
   UserSession._internal();
 
-  String userName = 'Alex Johnson';
-  String email = 'alex.j@campus.edu';
-  String department = 'Computer Science';
+  String userName = 'Vivek Sai';
+  String email = 'viveksai@pvpsit.ac.in';
+  String department = 'Data Science';
   
   double _fontSize = 14.0;
   String _fontStyle = 'Default';
