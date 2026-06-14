@@ -3,7 +3,16 @@
 <head>
   Page is loading Please just wait few seconds....
   If not opening after waiting Please refresh the page...
-  <base href="$FLUTTER_BASE_HREF"> 
+  <script>
+    var baseHref = window.location.pathname;
+    if (baseHref.indexOf('.html') !== -1) {
+      baseHref = baseHref.substring(0, baseHref.lastIndexOf('/') + 1);
+    }
+    if (baseHref !== '' && !baseHref.endsWith('/')) {
+      baseHref += '/';
+    }
+    document.write('<base href="' + baseHref + '">');
+  </script>
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
